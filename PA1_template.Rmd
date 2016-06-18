@@ -38,7 +38,7 @@ stepMedian
 
 ```{r}
 
-hist(totalSteps, breaks = 12,
+hist(totalSteps, breaks = 12, col =' green',
      xlab = "Number of Steps Per Day",
      ylab = "Frequency of Occurance in Data",
      main = "Histogram of total steps per day")
@@ -112,7 +112,7 @@ stepMedian2
 
 ```{r}
 
-hist(totalSteps2, breaks = 12,
+hist(totalSteps, breaks = 12, col =' green',
      xlab = "Number of Steps Per Day",
      ylab = "Frequency of Occurance in Data",
      main = "Histogram of total steps per day")
