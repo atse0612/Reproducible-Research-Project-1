@@ -1,0 +1,140 @@
+Reproducible Research Project 1
+
+
+Output: 
+  html_document:
+    keep_md: true
+    
+    
+## Loading and preprocessing the data
+
+```{r}
+
+setwd("./R/Reproducible Research")
+
+activityData <- read.csv(file = "activity.csv", sep =",", colClasses=c("integer","Date","integer"))
+str(activityData)
+summary(activityData)
+
+```
+
+## What is Mean Total Number of Steps Taken Per Day
+
+Mean Number of Steps
+
+```{r}
+
+totalSteps <- tapply(activityData$steps, activityData$date, sum, na.rm=TRUE)
+stepMean <- mean(totalSteps)
+stepMean
+
+Median 
+
+stepMedian <- median(totalSteps)
+stepMedian
+
+```
+## Histogram of Total Steps Taken Each Day
+
+```{r}
+
+hist(totalSteps, breaks = 12,
+     xlab = "Number of Steps Per Day",
+     ylab = "Frequency of Occurance in Data",
+     main = "Histogram of total steps per day")
+
+abline(v=stepMean, col="purple", lwd ="4")
+abline(v=stepMedian, col="brown", lwd ="4")
+legend(x = "topright", legend = c("mean", "median"), col=c("purple","brown"), lwd = 4)
+
+```
+
+## Average Daily Activity Pattern
+
+```{r}
+
+library(plyr)
+dailyActivity <- ddply(activityData, .(interval), summarize, steps = mean(steps, na.rm = TRUE))
+with(dailyActivity, plot(interval, steps, type = "l"))
+
+```
+
+5 Minutes Containing the Maximum Number of Steps
+
+```{r}
+
+maxSteps <- dailyActivity[which.max(dailyActivity$steps),]$interval
+
+```
+
+## Inputing Missing Values
+
+Find Out How Many Missing Values
+
+
+```{r}
+
+sum(is.na(activityData$steps))
+
+```
+
+# Filling in All the Missing Values in the Dataset
+
+```{r}
+
+
+stepValues <- data.frame(activityData$steps)
+stepValues [is.na(stepValues),] <- ceiling(tapply(X=activityData$steps,INDEX=activityData$interval,FUN=mean,na.rm=TRUE))
+
+newData <- cbind(stepValues, activityData[,2:3])
+colnames(newData) <- c("Steps", "Date", "Interval")
+
+summary(newData)
+
+
+```
+
+Newly Inputed Dataset from the Old Dataset
+
+```{r}
+
+totalSteps2 <- tapply(newData$Steps, newData$Date, sum, na.rm=TRUE)
+stepMean2 <- mean(totalSteps2)
+stepMean2
+
+stepMedian2 <- median(totalSteps2)
+stepMedian2
+
+```
+
+
+## New Input Histogram Data
+
+```{r}
+
+hist(totalSteps2, breaks = 12,
+     xlab = "Number of Steps Per Day",
+     ylab = "Frequency of Occurance in Data",
+     main = "Histogram of total steps per day")
+
+abline(v=stepMean2, col="purple", lwd ="5")
+abline(v=stepMedian2, col="brown", lwd ="3")
+legend(x = "topright", legend = c("mean", "median"), col=c("purple","brown"), lwd = 4)
+
+```
+
+## Differences in Activity Patterns Between Weekend and Weekdays
+
+```{r}
+
+newData$Weekend <- weekdays(newData$Date) == "Saturday" | weekdays(newData$Date) == "Sunday"
+
+newData$Weekend <- factor(newData$Weekend, levels = c(F, T), labels = c("Weekday", "Weekend"))
+
+activity <- ddply(newData, .(Interval, Weekend), summarize, steps = mean(Steps, na.rm = TRUE))
+
+library(lattice)
+xyplot(steps ~ Interval | Weekend, activity, type = "l", layout = c(1, 2), ylab = "Number of Steps", xlab = "Interval", main = "Weekend vs. Weekday activity patterns")
+
+```
+
